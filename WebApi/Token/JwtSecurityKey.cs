@@ -10,4 +10,4 @@ namespace WebApi.Token
             return new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secret));
         }
     }
-}
+}// TOKEN DE SENHAS
