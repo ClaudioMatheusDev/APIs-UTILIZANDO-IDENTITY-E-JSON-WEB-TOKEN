@@ -1,4 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace WebApi.Token
 {
@@ -62,6 +64,30 @@ namespace WebApi.Token
                 throw new ArgumentNullException("issuer");
             if (string.IsNullOrEmpty(this.audience))
                 throw new ArgumentNullException("audience");
+        }
+
+        public TokenJWT Builder()
+        {
+            EnsureArguments();
+
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub,this.subject),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            }.Union(this.claims.Select(item => new Claim(item.Key, item.Value)));
+
+            var token = new JwtSecurityToken(
+                issuer: this.issuer,
+                audience: this.audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(expiryInMinutes),
+                signingCredentials: new SigningCredentials(
+                                                   this.securityKey,
+                                                   SecurityAlgorithms.Aes128CbcHmacSha256)
+
+                );
+
+            return new TokenJWT(token);
         }
 
     }
